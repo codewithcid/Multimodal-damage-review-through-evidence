@@ -1,0 +1,22 @@
+# Secrets
+.env
+code/.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Run artifacts (regenerated)
+code/runs/
+code.zip
+
+# Large image corpus (excluded from submission zip too)
+dataset/images/
+
+# OS
+.DS_Store
+Thumbs.db
