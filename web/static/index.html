@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evidence Review — Live Demo</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <span class="logo">◑</span>
+      <div>
+        <h1>Multi-Modal Evidence Review</h1>
+        <p class="tagline">Upload a damage photo, describe the claim — the model returns a verdict.</p>
+      </div>
+    </div>
+    <a class="gh" href="https://github.com/codewithcid/Multimodal-damage-review-through-evidence"
+       target="_blank" rel="noopener">View on GitHub ↗</a>
+  </header>
+
+  <!-- PERFORMANCE PANEL -->
+  <section class="metrics" id="metrics">
+    <h2>Measured performance <small id="metrics-source">on the labeled sample</small></h2>
+    <div class="stat-row" id="stat-row">
+      <div class="stat"><div class="num" data-k="claim_status">—</div><div class="lbl">Decision accuracy</div></div>
+      <div class="stat"><div class="num" data-k="evidence_standard_met">—</div><div class="lbl">Evidence sufficiency</div></div>
+      <div class="stat"><div class="num" data-k="object_part">—</div><div class="lbl">Part identification</div></div>
+      <div class="stat"><div class="num" data-k="valid_image">—</div><div class="lbl">Image validity</div></div>
+      <div class="stat"><div class="num" data-k="risk_flags_f1">—</div><div class="lbl">Risk-flag F1</div></div>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <section class="demo">
+    <!-- INPUTS -->
+    <div class="card">
+      <h3>1 · Submit a claim</h3>
+
+      <label class="field-label">Damage photo(s)</label>
+      <div id="dropzone" class="dropzone">
+        <input id="file-input" type="file" accept="image/*" multiple hidden />
+        <div class="dz-empty" id="dz-empty">
+          <span class="dz-icon">⤓</span>
+          <p>Click or drop image(s) here</p>
+          <small>car · laptop · package</small>
+        </div>
+        <div id="previews" class="previews"></div>
+      </div>
+
+      <label class="field-label" for="object">Object type</label>
+      <select id="object">
+        <option value="car">Car</option>
+        <option value="laptop">Laptop</option>
+        <option value="package">Package</option>
+      </select>
+
+      <label class="field-label" for="claim">The claim (what's wrong)</label>
+      <textarea id="claim" rows="4"
+        placeholder="e.g. My laptop screen is cracked after it fell off the desk."></textarea>
+
+      <label class="toggle">
+        <input type="checkbox" id="risky" />
+        <span>Simulate a high-risk claimant history</span>
+      </label>
+
+      <button id="analyze" class="btn">Analyze claim</button>
+      <p class="hint" id="hint"></p>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="card result-card">
+      <h3>2 · Verdict</h3>
+      <div id="result-empty" class="result-empty">
+        <p>The verdict will appear here.</p>
+        <small>Or try an example below.</small>
+      </div>
+
+      <div id="result" class="result hidden">
+        <div class="verdict-head">
+          <span id="verdict-badge" class="badge">—</span>
+          <span id="severity-badge" class="sev">—</span>
+        </div>
+
+        <p id="justification" class="justification"></p>
+
+        <div class="fields">
+          <div><span class="k">Issue type</span><span class="v" id="r-issue">—</span></div>
+          <div><span class="k">Object part</span><span class="v" id="r-part">—</span></div>
+          <div><span class="k">Evidence sufficient</span><span class="v" id="r-evidence">—</span></div>
+          <div><span class="k">Image usable</span><span class="v" id="r-valid">—</span></div>
+          <div><span class="k">Supporting images</span><span class="v" id="r-support">—</span></div>
+        </div>
+
+        <div class="flags-wrap">
+          <span class="k">Risk flags</span>
+          <div id="r-flags" class="flags"></div>
+        </div>
+
+        <div class="meta" id="r-meta"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXAMPLES -->
+  <section class="examples">
+    <h3>Try an example</h3>
+    <div class="ex-row" id="ex-row"></div>
+  </section>
+
+  <footer class="site-footer">
+    Powered by Gemini 2.5 vision + a deterministic guardrail layer · images are the source of truth, history only adds risk context.
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -45,6 +45,20 @@ def resolve(rel_path: str) -> Path:
     return (config.IMAGE_BASE / rel_path).resolve()
 
 
+def _encode(im: Image.Image) -> tuple[bytes, int, int]:
+    """Honor EXIF orientation, convert to RGB, downscale, and JPEG-encode."""
+    im = ImageOps.exif_transpose(im)
+    im = im.convert("RGB")
+    long_edge = max(im.size)
+    if long_edge > config.MAX_IMAGE_LONG_EDGE:
+        scale = config.MAX_IMAGE_LONG_EDGE / long_edge
+        new_size = (max(1, round(im.width * scale)), max(1, round(im.height * scale)))
+        im = im.resize(new_size, Image.LANCZOS)
+    buf = io.BytesIO()
+    im.save(buf, format="JPEG", quality=config.JPEG_QUALITY, optimize=True)
+    return buf.getvalue(), im.width, im.height
+
+
 def load_and_process(rel_path: str) -> LoadedImage:
     image_id = image_id_from_path(rel_path)
     abs_path = resolve(rel_path)
@@ -52,20 +66,20 @@ def load_and_process(rel_path: str) -> LoadedImage:
         return LoadedImage(image_id, rel_path, b"", "image/jpeg", 0, 0, False, "file not found")
     try:
         with Image.open(abs_path) as im:
-            im = ImageOps.exif_transpose(im)  # honor camera orientation
-            im = im.convert("RGB")
-            long_edge = max(im.size)
-            if long_edge > config.MAX_IMAGE_LONG_EDGE:
-                scale = config.MAX_IMAGE_LONG_EDGE / long_edge
-                new_size = (max(1, round(im.width * scale)), max(1, round(im.height * scale)))
-                im = im.resize(new_size, Image.LANCZOS)
-            buf = io.BytesIO()
-            im.save(buf, format="JPEG", quality=config.JPEG_QUALITY, optimize=True)
-            return LoadedImage(
-                image_id, rel_path, buf.getvalue(), "image/jpeg", im.width, im.height, True
-            )
+            data, w, h = _encode(im)
+            return LoadedImage(image_id, rel_path, data, "image/jpeg", w, h, True)
     except Exception as e:  # noqa: BLE001 - any decode error => unusable image
         return LoadedImage(image_id, rel_path, b"", "image/jpeg", 0, 0, False, str(e))
+
+
+def process_bytes(data: bytes, image_id: str, rel_path: str = "") -> LoadedImage:
+    """Process raw uploaded image bytes (no file on disk) into a LoadedImage."""
+    try:
+        with Image.open(io.BytesIO(data)) as im:
+            jpg, w, h = _encode(im)
+            return LoadedImage(image_id, rel_path or image_id, jpg, "image/jpeg", w, h, True)
+    except Exception as e:  # noqa: BLE001
+        return LoadedImage(image_id, rel_path or image_id, b"", "image/jpeg", 0, 0, False, str(e))
 
 
 def load_claim_images(image_paths: List[str]) -> List[LoadedImage]:
