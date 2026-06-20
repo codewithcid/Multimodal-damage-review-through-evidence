@@ -13,6 +13,8 @@ venv/
 # Run artifacts (regenerated)
 code/runs/
 code.zip
+my_result.csv
+*_result.csv
 
 # Large image corpus (excluded from submission zip too)
 dataset/images/

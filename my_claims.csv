@@ -1,0 +1,2 @@
+user_id,image_paths,user_claim,claim_object
+me_001,images/test/case_044/img_1.jpg,"Customer: My laptop screen is cracked. | Support: Just the screen? | Customer: Yes, the screen has a crack.",laptop
