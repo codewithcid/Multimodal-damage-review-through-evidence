@@ -12,6 +12,20 @@
   --radius: 14px;
 }
 * { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+#demo, #how { scroll-margin-top: 24px; }
+.header-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.how-section { max-width: 1080px; margin: 48px auto 0; padding: 0 24px; }
+.how-eyebrow { color: var(--accent); font-size: 11px; letter-spacing: 1.8px; margin-bottom: 8px; }
+.how-section h2 { font-size: 27px; }
+.how-intro { color: var(--muted); max-width: 750px; font-size: 14px; }
+.how-grid { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 22px; }
+.how-number { color: var(--accent); font-size: 13px; font-weight: 700; }
+.how-grid h3 { margin-top: 14px; margin-bottom: 8px; }
+.how-grid p { color: var(--muted); font-size: 13px; margin-bottom: 0; }
+@media (max-width: 1000px) { .how-grid { grid-template-columns: repeat(2, 1fr); } .site-header { flex-wrap: wrap; gap: 18px; } }
+@media (max-width: 600px) { .how-grid { grid-template-columns: 1fr; } .site-header { padding: 20px; } .site-header h1 { font-size: 17px; } .header-nav .gh { padding: 7px 10px; font-size: 12px; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body {
   margin: 0;
   font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;

@@ -1,0 +1,11 @@
+{
+  "claim_status": 0.8,
+  "evidence_standard_met": 0.95,
+  "object_part": 0.9,
+  "valid_image": 0.95,
+  "risk_flags_f1": 0.85,
+  "supporting_image_ids_f1": 0.917,
+  "n": 20,
+  "source": "calibrated eval (gemini-flash-lite-latest)",
+  "artifact": "code/runs/eval_report_gemini-flash-lite-latest.json"
+}

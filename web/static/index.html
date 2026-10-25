@@ -15,8 +15,12 @@
         <p class="tagline">Upload a damage photo, describe the claim — the model returns a verdict.</p>
       </div>
     </div>
-    <a class="gh" href="https://github.com/codewithcid/Multimodal-damage-review-through-evidence"
-       target="_blank" rel="noopener">View on GitHub ↗</a>
+    <nav class="header-nav" aria-label="Main navigation">
+      <a class="gh" href="#demo">Try the demo</a>
+      <a class="gh" href="#how">How it works</a>
+      <a class="gh" href="https://github.com/codewithcid/Multimodal-damage-review-through-evidence"
+         target="_blank" rel="noopener">GitHub ↗</a>
+    </nav>
   </header>
 
   <!-- PERFORMANCE PANEL -->
@@ -32,7 +36,7 @@
   </section>
 
   <!-- DEMO -->
-  <section class="demo">
+  <section class="demo" id="demo">
     <!-- INPUTS -->
     <div class="card">
       <h3>1 · Submit a claim</h3>
@@ -106,6 +110,18 @@
   <section class="examples">
     <h3>Try an example</h3>
     <div class="ex-row" id="ex-row"></div>
+  </section>
+
+  <section class="how-section" id="how" aria-labelledby="how-heading">
+    <p class="how-eyebrow">FROM PHOTO TO EVIDENCE</p>
+    <h2 id="how-heading">How it works</h2>
+    <p class="how-intro">The image is the source of truth. A claim provides context; user history adds review flags without changing what the photo shows.</p>
+    <ol class="how-grid">
+      <li class="card"><span class="how-number">01</span><h3>Submit the evidence</h3><p>Choose car, laptop, or package; add up to three photos and describe the damage. The server checks image readability and prepares the photos and claim for Gemini.</p></li>
+      <li class="card"><span class="how-number">02</span><h3>Inspect with vision</h3><p>Gemini reviews the submitted photos and claim against the required evidence for that object. Structured output records the visible damage, affected part, severity, and supporting image IDs.</p></li>
+      <li class="card"><span class="how-number">03</span><h3>Apply the guardrails</h3><p>Deterministic checks validate the response, handle unusable images, flag instruction-like text, and add claimant-history risk context. History alone cannot establish visible damage.</p></li>
+      <li class="card"><span class="how-number">04</span><h3>Review the verdict</h3><p>See supported, contradicted, or not enough information, with an evidence-grounded explanation and review flags. The performance panel reports a separate evaluation on 20 labeled sample cases.</p></li>
+    </ol>
   </section>
 
   <footer class="site-footer">

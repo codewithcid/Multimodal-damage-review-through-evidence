@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: multimodal-evidence-review
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r code/requirements.txt -r web/requirements.txt
+    startCommand: uvicorn web.server:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: EVIDENCE_MAX_RETRIES
+        value: "1"

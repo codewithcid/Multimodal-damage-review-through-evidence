@@ -1,5 +1,19 @@
 # Live Demo — Multi-Modal Evidence Review
 
+## Deploy on Render
+
+The repository includes a free-tier `render.yaml` blueprint. Configure
+`GEMINI_API_KEY` as a secret in Render; it is never included in the repository.
+The service installs both requirements files and starts
+`uvicorn web.server:app --host 0.0.0.0 --port $PORT`.
+`GET /api/health` reports service health and whether the real model is configured.
+
+The public interface includes a How it works section. Each request accepts up to
+three images of 5 MB each and a 4,000-character claim. Missing credentials and
+exhausted model quota produce an explicit unavailable response rather than a mock
+verdict. The deployed evaluation panel uses the measured, aggregate results in
+`web/evaluation_metrics.json` (20 labeled sample cases).
+
 A web page that showcases the model: upload a damage photo, describe the claim,
 and the existing pipeline (Gemini 2.5 vision + deterministic guardrails) returns
 a verdict. Also shows the measured accuracy of the system.

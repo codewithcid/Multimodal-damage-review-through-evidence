@@ -29,12 +29,17 @@ except ImportError:
 from fastapi import FastAPI, File, Form, UploadFile  # noqa: E402
 from fastapi.responses import FileResponse, JSONResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
+from starlette.concurrency import run_in_threadpool  # noqa: E402
 
 from evidence_review import config, data, images, postprocess, prompts  # noqa: E402
 from evidence_review.data import Claim, UserHistory  # noqa: E402
 from evidence_review.gemini_client import GeminiClient  # noqa: E402
 
 app = FastAPI(title="Multi-Modal Evidence Review — Live Demo")
+
+@app.get("/api/health")
+def health():
+    return {"status": "ok", "model_configured": _HAS_KEY, "mode": "live" if _HAS_KEY else "unconfigured"}
 
 # Build one client (failover chain survives free-tier daily caps) + load reqs once.
 _MODELS = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-flash-lite-latest"]
@@ -59,11 +64,6 @@ def index():
 @app.get("/api/metrics")
 def metrics():
     """Measured accuracy for the performance panel (from the eval artifacts)."""
-    fallback = {
-        "claim_status": 0.80, "evidence_standard_met": 0.95, "object_part": 0.90,
-        "valid_image": 0.95, "risk_flags_f1": 0.85, "supporting_image_ids_f1": 0.92,
-        "n": 20, "source": "calibrated eval (gemini-flash-lite-latest)",
-    }
     try:
         p = config.RUNS_DIR / "eval_report_gemini-flash-lite-latest.json"
         m = json.loads(p.read_text(encoding="utf-8"))["metrics"]
@@ -77,7 +77,7 @@ def metrics():
             "n": m["n"], "source": "calibrated eval on labeled sample",
         }
     except Exception:
-        return fallback
+        return json.loads((_HERE / "evaluation_metrics.json").read_text(encoding="utf-8"))
 
 
 @app.post("/api/analyze")
@@ -92,12 +92,20 @@ async def analyze(
         return JSONResponse({"error": "claim_object must be car, laptop, or package"}, status_code=400)
     if not files:
         return JSONResponse({"error": "upload at least one image"}, status_code=400)
+    if len(files) > 3:
+        return JSONResponse({"error": "Upload at most three images per claim."}, status_code=400)
+    if not claim.strip() or len(claim) > 4000:
+        return JSONResponse({"error": "Describe the claim in 1 to 4,000 characters."}, status_code=400)
+    if not _HAS_KEY:
+        return JSONResponse({"error": "The live model is not configured. Please try again later."}, status_code=503)
 
     # process uploaded bytes into LoadedImages (img_1, img_2, ...)
     loaded = []
     names = []
     for i, f in enumerate(files):
-        raw = await f.read()
+        raw = await f.read(5 * 1024 * 1024 + 1)
+        if len(raw) > 5 * 1024 * 1024:
+            return JSONResponse({"error": "Each image must be 5 MB or smaller."}, status_code=413)
         names.append(f.filename or f"img_{i+1}")
         loaded.append(images.process_bytes(raw, image_id=f"img_{i+1}", rel_path=f.filename or ""))
 
@@ -114,7 +122,9 @@ async def analyze(
     text_context = prompts.build_text_context(claim_obj, hist, reqs, loaded)
 
     t0 = time.time()
-    verdict, usage = _CLIENT.verdict(text_context, loaded)
+    verdict, usage = await run_in_threadpool(_CLIENT.verdict, text_context, loaded)
+    if usage.errors:
+        return JSONResponse({"error": "The vision service is temporarily unavailable or has reached its quota. Please try again later."}, status_code=503)
     latency = round(time.time() - t0, 2)
     row = postprocess.finalize(claim_obj, verdict, hist, loaded)
 
